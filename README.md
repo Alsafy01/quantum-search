@@ -5,12 +5,12 @@ Design a quantum circuit that considers as input the following vector of integer
 [1,5,7,10] \
 returns a quantum state which is a superposition of indices of the target solution, obtaining in the output the indices of the inputs where two adjacent bits will always have different values.
 
-In this case the output should be: (|01⟩ + |11⟩)/sqrt(2), as the correct indices are 1 and 3. \
+In this case the output should be: ![\small\frac{|01\rangle+|11\rangle}{\sqrt2}](https://latex.codecogs.com/svg.latex?\small\frac{|01\rangle+|11\rangle}{\sqrt2}), as the correct indices are 1 and 3.
+
 1 = 0001 \
 5 = 0101 \
 7 = 0111 \
 10 = 1010 \
-
 The method to follow for this task is to start from an array of integers as input, pass them to a binary representation and you need to find those integers whose binary representation is such that two adjacent bits are different. Once you have found those integers, you must output a superposition of states where each state is a binary representation of the indices of those integers.
 
 ## Context
@@ -22,11 +22,11 @@ As with classical computers, in the QRAM information is accessed using a set of 
 Design a general circuit that accepts vectors with random values of size 2n with m bits in length for each element and finds the state(s) indicated above from an oracle.
 
 ## Idea
-Given is a list of 2^n numbers with size of the largest number being m-bits. First we load these numbers into qubits after which they will now be treated as `states`. We then design a circuit which searches for the states with an alternating '0'-'1' pattern in their binary representation. We do this by passing these states progressively through some Grover iterations.
+Given is a list of ![\small 2^{n}](https://latex.codecogs.com/svg.latex?\small%202^{n}) numbers with size of the largest number being m-bits. First we load these numbers into qubits after which they will now be treated as `states`. We then design a circuit which searches for the states with an alternating '0'-'1' pattern in their binary representation. We do this by passing these states progressively through some Grover iterations.
 
 This method indeed finds the general solution for any input.
 
-The detailed procedure is described in the **`Steps`** below.
+The detailed procedure is described in the **[`Steps`](https://github.com/AsishMandoi/qudratic-speedup-using-quantum#steps)** below.
 
 ## Full circuit obtained from Quirk simulator
 ![q_circ.jpg](https://raw.githubusercontent.com/AsishMandoi/qudratic-speedup-using-quantum/main/cir.jpg)
@@ -36,7 +36,7 @@ The detailed procedure is described in the **`Steps`** below.
 ## Steps
 ### Input Loading
   - We have the data in classical bits, but for the search algorithm we need the data in qubits
-  - Mathematically input loading looks like: |000...000⟩|000...000⟩ -> |000..001⟩|d_1⟩ + |000..010⟩|d_2⟩ + ... |111..111⟩|d_N⟩
+  - Mathematically input loading looks like: ![\small\sum\limits_{i=0}^{n-1} |i\rangle|0\rangle \rightarrow \sum\limits_{i=0}^{n-1} |i\rangle|d_{i}\rangle](https://latex.codecogs.com/svg.latex?\small\sum\limits_{i=0}^{n-1}%20|i\rangle|0\rangle%20\rightarrow%20\sum\limits_{i=0}^{n-1}%20|i\rangle|d_{i}\rangle)
   - This also needs to be done efficiently (in less time and space)
   - There are multiple ways to do this
     - Classical Loading Scheme
@@ -48,30 +48,29 @@ The detailed procedure is described in the **`Steps`** below.
 
   - For the purposes of my implementation of the search algorithm:
     - N = length of input vector
-    - n = ⌈log_2N⌉ 
-    (If N is not a power of 2 then it is set to 2^n and the input vector is padded with 0s in its end)
+    - n = ![\small\lceil log_{2}(N)\rceil](https://latex.codecogs.com/svg.latex?\small\lceil%20log_{2}(N)\rceil) *(If N is not a power of 2 then it is set to ![\small 2^{n}](https://latex.codecogs.com/svg.latex?\small%202^{n}) and the input vector is padded with 0s in its end)*
     - m = minimum length of bitstring of the largest number in the input
-    - M = 2^m
+    - M = ![\small 2^{m}](https://latex.codecogs.com/svg.latex?\small%202^{m})
     - k = total number of values in the input vector that satify the given conditions (it will also be equal to the number of marked states)
 
 #### Explanation of the Input Loading procedure
-  - Input loading consists of exactly 2^n multi-control multi-not gates.
+  - Input loading consists of exactly ![\small 2^{n}](https://latex.codecogs.com/svg.latex?\small%202^{n}) multi-control multi-not gates.
   - The multi-control part acts on `n address qubits` and the multi-NOTs part on `m data qubits`.
   - The application of the multi-controls is defined as follows:
     - The control points of the ith gate from left corresponds to the ith index.
     - The control points on the jth qubit from the top (in the diagram) corresponds to the jth bit in the binary representation of the ith index.
-    - A `○` or `anti-control` corresponds to a `0` and a `■` or `control` corresponds to a `1`.
+    - A '![\small\circ](https://latex.codecogs.com/svg.latex?\small\circ)' or `anti-control` corresponds to a `0` and a '![\small\bullet](https://latex.codecogs.com/svg.latex?\small\bullet)' or `control` corresponds to a `1`.
     - For e.g.:
-      - If the index is 5 in a 4-qubit control structure, the control points will look like `○-■-○-■` corresponding to `0101`.
-      - Similary, if the index is 11, in an 4-qubit control structure, the control points will look like `■-○-■-■` corresponding to `1011`.
+      - If the index is 5 in a 4-qubit control structure, the control points will look like '![\small\circ-\bullet-\circ-\bullet](https://latex.codecogs.com/svg.latex?\small\circ-\bullet-\circ-\bullet)' corresponding to `0101`.
+      - Similary, if the index is 11, in an 4-qubit control structure, the control points will look like '![\small\bullet-\circ-\bullet-\bullet](https://latex.codecogs.com/svg.latex?\small\bullet-\circ-\bullet-\bullet)' corresponding to `1011`.
 
-  - The application of the multi-`NOT`s or multi-`X`s are defined as follows:
+  - The application of the multi-NOTs or multi-Xs are defined as follows:
     - The X in ith gate corresponds to the data of ith index.
     - The X in jth data qubit corresponds to the jth bit in the binary representation of data in ith index.
-    - A `•` (or no X gate) corresponds to a `0` in the data, and a `⊕` corresponds to a `1`
+    - A '![\cdot](https://latex.codecogs.com/svg.latex?\cdot)' (or no X gate) corresponds to a `0` in the data, and a '![\oplus](https://latex.codecogs.com/svg.latex?\small\oplus)' corresponds to a `1`
     - For e.g.:
-      - If the data to be stored is 18 in a 5-qubit data, the gates will look like `⊕-•-•-⊕-•` corresponding to `10010`.
-      - Similarly, if the data to be stored is 3 in a 5-qubit data, the gates will look like `•-•-•-⊕-⊕` corresponding to `00011`.
+      - If the data to be stored is 18 in a 5-qubit data, the gates will look like '![\small\oplus-\cdot-\cdot-\oplus-\cdot](https://latex.codecogs.com/svg.latex?\small\oplus-\cdot-\cdot-\oplus-\cdot)' corresponding to `10010`.
+      - Similarly, if the data to be stored is 3 in a 5-qubit data, the gates will look like '![\small\cdot-\cdot-\cdot-\oplus-\oplus](https://latex.codecogs.com/svg.latex?\small\cdot-\cdot-\cdot-\oplus-\oplus)' corresponding to `00011`.
 
 ### Oracle
   - We need the Oracle to mark the states which satisfy the condition
@@ -81,31 +80,31 @@ The detailed procedure is described in the **`Steps`** below.
   - We then mark those states which satisfy one of the above conditions, by `bringing a -ve phase` into the qubits
 
 #### Working of the Oracle
-  - The CNOT gates compare the individual `|s⟩` (search state) qubits and the individual `|d⟩` (data) qubits.
-  - The gate will return a `|0⟩` if the two states are same and a `|1⟩` if they are complementary to each other.
-  - The `multi-anti-control-X` gate will act on the ancilla only if all the |s⟩ states and the |d⟩ states are equal.
-  - Similarly, the `multi-control-X` gate will act on the ancilla only if all the |s⟩ states and the |d⟩ states are complimentary.
+  - The CNOT gates compare the individual ![\small|s\rangle](https://latex.codecogs.com/svg.latex?\small|s\rangle) (search state) qubits and the individual ![\small|d\rangle](https://latex.codecogs.com/svg.latex?\small|d\rangle) (data) qubits.
+  - The gate will return a ![\small|0\rangle](https://latex.codecogs.com/svg.latex?\small|0\rangle) if the two states are same and a ![\small|1\rangle](https://latex.codecogs.com/svg.latex?\small|1\rangle) if they are complementary to each other.
+  - The `multi-anti-control-X` gate will act on the ancilla only if all the ![\small|s\rangle](https://latex.codecogs.com/svg.latex?\small|s\rangle) states and the ![\small|d\rangle](https://latex.codecogs.com/svg.latex?\small|d\rangle) states are equal.
+  - Similarly, the `multi-control-X` gate will act on the ancilla only if all the ![\small|s\rangle](https://latex.codecogs.com/svg.latex?\small|s\rangle) states and the ![\small|d\rangle](https://latex.codecogs.com/svg.latex?\small|d\rangle) states are complimentary.
   - When one of the gates acts on the ancilla, there is a bit-flip.
-  *(It easy to see that at most one of the gate can act as the |s⟩ states and the |d⟩ states can't be equal as well as complimentary at the same time.)*
-  - So (|0⟩-|1⟩)/sqrt(2) changes to (|1⟩-|0⟩)/sqrt(2) which is same as -(|0⟩-|1⟩)/sqrt(2)
+  *(It easy to see that at most one of the gate can act as the ![\small|s\rangle](https://latex.codecogs.com/svg.latex?\small|s\rangle) states and the ![\small|d\rangle](https://latex.codecogs.com/svg.latex?\small|d\rangle) states can't be equal as well as complimentary at the same time.)* \  
+  So ![\small\frac{|0\rangle-|1\rangle}{\sqrt2}](https://latex.codecogs.com/svg.latex?\small\frac{|0\rangle-|1\rangle}{\sqrt2}) changes to ![\small\frac{|1\rangle-|0\rangle}{\sqrt2}](https://latex.codecogs.com/svg.latex?\small\frac{|1\rangle-|0\rangle}{\sqrt2}) which is same as ![\small-\frac{|0\rangle-|1\rangle}{\sqrt2}](https://latex.codecogs.com/svg.latex?\small-\frac{|0\rangle-|1\rangle}{\sqrt2})
 
 ### Diffuser
   - The diffuser gate is applied to amplify the amplitude of only the required states of the indices.
-  - Mathematically, this step is described by the unitary operator U_s = 2*|a_us⟩⟨a_us| - I
-  - It is effectively a reflection of the current state |a⟩ of indices about the state of uniform superposition |a_us⟩ of all the indices.
+  - Mathematically, this step is described by the unitary operator ![\small U_{s}=2*|a_s\rangle\langle a_s|-I](https://latex.codecogs.com/svg.latex?\small%20U_{s}=2*|a_s\rangle\langle%20a_s|-I)
+  - It is effectively a reflection of the current state ![\small|a\rangle](https://latex.codecogs.com/svg.latex?\small|a\rangle) of indices about the state of uniform superposition ![\small|a_{s}\rangle](https://latex.codecogs.com/svg.latex?\small|a_{s}\rangle) of all the indices.
 
 ### Resetting Qubits
-  - I have reset the qubits other than the address qubits to the |0⟩ state in order to be able to `retrieve the address qubits exclusively`
+  - I have reset the qubits other than the address qubits to the ![\small|0\rangle](https://latex.codecogs.com/svg.latex?\small|0\rangle) state in order to be able to `retrieve the address qubits exclusively`
   - **Please note here that this reset operation is actually a series of `unitary operations` (and hence reversible) unlike the non-unitary reset operation for QuantumCircuits provided by Qiskit**
 
 ### The Final Result
-  - Since we had taken an additional qubit to make sure that Grover's algorithm doesn't encounter more marked states than unmarked states, we are getting an additional qubit |0⟩ in the beginning in bloch sphere.
+  - Since we had taken an additional qubit to make sure that Grover's algorithm doesn't encounter more marked states than unmarked states, we are getting an additional qubit ![\small|0\rangle](https://latex.codecogs.com/svg.latex?\small|0\rangle) in the beginning in bloch sphere.
   - I have expressed the final state in the form of a statevector so that all information (amplitude along with phase) about the final state can be checked. The final statevector |psi⟩_idx gives the amplitudes of the basis states (as is expected). \
-  For e.g.: [0, 1/sqrt(2), 0, 1/sqrt(2), 0, 0, 0, 0] in statevector form is the same as (|001⟩+|011⟩)/sqrt(2)
-  - The statevector of the whole circuit has dimensions 2^(n+2*m+1). But, I have obtained the final statevector of dimensions 2^n by considering the first 2^n entries. This works because I had deliberately reset all the qubits except the address register for this purpose only, though we shouldn't do this in general.
+  For e.g.: ![\small\begin{bmatrix}0 & \frac{1}{\sqrt2} & 0 & \frac{1}{\sqrt2} & 0 & 0 & 0 & 0\end{bmatrix} \equiv \frac{|001\rangle+|011\rangle}{\sqrt2}](https://latex.codecogs.com/svg.latex?\small\begin{bmatrix}%200%20&%20\frac{1}{\sqrt2}%20&%200%20&%20\frac{1}{\sqrt2}%20&%200%20&%200%20&%200%20&%200%20\end{bmatrix}%20\equiv%20\frac{|001\rangle+|011\rangle}{\sqrt2})
+  - The statevector of the whole circuit has dimensions ![\small 2^{n+2*m+1}](https://latex.codecogs.com/svg.latex?\small%202^{n+2*m+1}). But, I have obtained the final statevector of dimensions ![\small 2^{n}](https://latex.codecogs.com/svg.latex?\small%202^{n}) by considering the first ![\small 2^{n}](https://latex.codecogs.com/svg.latex?\small%202^{n}) entries. This works because I had deliberately reset all the qubits except the address register for this purpose only, though we shouldn't do this in general.
 
 ## Few Important Notes
-  The oracle and the diffuser part need to be applied for approximately sqrt(n/k) iterations. (n and k defined above)
+  The oracle and the diffuser part need to be applied for approximately ![\small\sqrt\frac{n}{k}](https://latex.codecogs.com/svg.latex?\small\sqrt\frac{n}{k}) iterations. (n and k defined above)
 
   I have `tested this algorithm for random cases` including those where the numbers satisfying the conditions are repeated, and it seems to work fine, apart from very small errors in some cases. It works best with inputs where the ratio of number of marked states to the number of unmarked states is very low. It should give the final states which are close to the correct state, almost always, for any general input.
 
