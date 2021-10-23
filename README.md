@@ -1,5 +1,10 @@
 # Quantum Search on an unstructured input
 
+This is my attempt to the Assessment Task - 1 (also described below) of [`QOSF`](https://qosf.org/)'s Quantum Computing Mentorship Program Cohort 4. \
+Thanks to [@qosf](https://github.com/qosf) and [Michał Stęchły](https://www.mustythoughts.com/about.html) for accepting this attempt as one of the model solutions to the task!
+
+*Please view this page in light mode to be able to see the latex expressions better*
+
 ## Problem Statement
 Design a quantum circuit that considers as input the following vector of integers numbers: \
 [1,5,7,10] \
@@ -36,7 +41,7 @@ The detailed procedure is described in the **[`Steps`](https://github.com/AsishM
 ## Steps
 ### Input Loading
   - We have the data in classical bits, but for the search algorithm we need the data in qubits
-  - Mathematically input loading looks like: ![\small\sum\limits_{i=0}^{n-1} |i\rangle|0\rangle \rightarrow \sum\limits_{i=0}^{n-1} |i\rangle|d_{i}\rangle](https://latex.codecogs.com/svg.latex?\small\sum\limits_{i=0}^{n-1}%20|i\rangle|0\rangle%20\rightarrow%20\sum\limits_{i=0}^{n-1}%20|i\rangle|d_{i}\rangle)
+  - Mathematically input loading looks like: ![\small\sum\limits_{i=0}^{2^n-1} |i\rangle|0\rangle \rightarrow \sum\limits_{i=0}^{2^n-1} |i\rangle|d_{i}\rangle](https://latex.codecogs.com/svg.latex?\small\sum\limits_{i=0}^{2^n-1}%20|i\rangle|0\rangle%20\rightarrow%20\sum\limits_{i=0}^{2^n-1}%20|i\rangle|d_{i}\rangle)
   - This also needs to be done efficiently (in less time and space)
   - There are multiple ways to do this
     - Classical Loading Scheme
@@ -54,7 +59,7 @@ The detailed procedure is described in the **[`Steps`](https://github.com/AsishM
     - k = total number of values in the input vector that satify the given conditions (it will also be equal to the number of marked states)
 
 #### Explanation of the Input Loading procedure
-  - Input loading consists of exactly ![\small 2^{n}](https://latex.codecogs.com/svg.latex?\small%202^{n}) multi-control multi-not gates.
+  - Input loading consists of exactly ![\small 2^{n}](https://latex.codecogs.com/svg.latex?\small%202^{n}) mixed-polarity multi-controlled multi-not gates.
   - The multi-control part acts on `n address qubits` and the multi-NOTs part on `m data qubits`.
   - The application of the multi-controls is defined as follows:
     - The control points of the ith gate from left corresponds to the ith index.
@@ -78,6 +83,7 @@ The detailed procedure is described in the **[`Steps`](https://github.com/AsishM
     1. exaclty the same as the number we are searching for, or
     2. the exact bitwise complement of the number we are searching for.
   - We then mark those states which satisfy one of the above conditions, by `bringing a -ve phase` into the qubits
+  - The function of the oracle can also be interpreted as reflection about the marked states
 
 #### Working of the Oracle
   - The CNOT gates compare the individual ![\small|s\rangle](https://latex.codecogs.com/svg.latex?\small|s\rangle) (search state) qubits and the individual ![\small|d\rangle](https://latex.codecogs.com/svg.latex?\small|d\rangle) (data) qubits.
